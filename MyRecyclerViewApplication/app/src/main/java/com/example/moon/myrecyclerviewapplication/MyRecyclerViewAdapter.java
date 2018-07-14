@@ -17,6 +17,7 @@ import java.util.List;
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.CustomViewHolder> {
     private List<FeedItem> feedItemList;
     private Context mContext;
+    private OnItemClickListener onItemClickListener;
 
     public MyRecyclerViewAdapter(Context context, List<FeedItem> feedItemList) {
         this.feedItemList = feedItemList;
@@ -32,7 +33,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     @Override
     public void onBindViewHolder(CustomViewHolder customViewHolder, int i) {
-        FeedItem feedItem = feedItemList.get(i);
+        final FeedItem feedItem = feedItemList.get(i);
 
         //Render image using Picasso library
         if (!TextUtils.isEmpty(feedItem.getThumbnail())) {
@@ -44,6 +45,15 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         //Setting text view title
         customViewHolder.textView.setText(Html.fromHtml(feedItem.getTitle()));
+
+        View.OnClickListener listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClickListener.onItemClick(feedItem);
+            }
+        };
+        customViewHolder.imageView.setOnClickListener(listener);
+        customViewHolder.textView.setOnClickListener(listener);
     }
 
     @Override
@@ -61,7 +71,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             this.textView = (TextView) view.findViewById(R.id.title);
         }
     }
-    private OnItemClickListener onItemClickListener;
     public OnItemClickListener getOnItemClickListener() {
         return onItemClickListener;
     }

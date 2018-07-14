@@ -32,20 +32,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        feedsList = new ArrayList<>();
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String url = "http://stacktips.com/?json=get_category_posts&slug=news&count=30";
         new DownloadTask().execute(url);
-        adapter.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(FeedItem item) {
-                Toast.makeText(MainActivity.this, item.getTitle(), Toast.LENGTH_LONG).show();
-
-            }
-        });
     }
 
     public class DownloadTask extends AsyncTask<String, Void, Integer> {
@@ -65,7 +58,9 @@ public class MainActivity extends AppCompatActivity {
                 int statusCode = urlConnection.getResponseCode();
 
                 // 200 represents HTTP OK
+                Log.d(TAG,"Status Code : "+statusCode);
                 if (statusCode == 200) {
+                    Log.d(TAG,"In !!!");
                     BufferedReader r = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                     StringBuilder response = new StringBuilder();
                     String line;
@@ -86,11 +81,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Integer result) {
             progressBar.setVisibility(View.GONE);
-
+            Log.e(TAG,"Now post Execution");
+            /*
+            FeedItem temp = new FeedItem();
+            temp.setTitle("Sample");
+            temp.setThumbnail("NULL");
+            feedsList.add(temp);
+            */
             if (result == 1) {
                 adapter = new MyRecyclerViewAdapter(MainActivity.this, feedsList);
                 mRecyclerView.setAdapter(adapter);
+                adapter.setOnItemClickListener(new OnItemClickListener() {
+                    @Override
+                    public void onItemClick(FeedItem item) {
+                        Toast.makeText(MainActivity.this, item.getTitle(), Toast.LENGTH_LONG).show();
+
+                    }
+                });
             } else {
+                Log.e(TAG,"count fetch data : ");
                 Toast.makeText(MainActivity.this, "Failed to fetch data!", Toast.LENGTH_SHORT).show();
             }
         }
@@ -98,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void parseResult(String result) {
         try {
+            Log.d(TAG,"onParseResult");
             JSONObject response = new JSONObject(result);
             JSONArray posts = response.optJSONArray("posts");
-            feedsList = new ArrayList<>();
 
             for (int i = 0; i < posts.length(); i++) {
                 JSONObject post = posts.optJSONObject(i);
